@@ -1,0 +1,30 @@
+{
+  "name": "hounds",
+  "version": "1.0.0",
+  "description": "Hounds will crawl a website based on scope and print out the associated urls",
+  "main": "hounds.js",
+  "dependencies": {
+    "bufferutil": "^4.0.1",
+    "normalize-url": "^5.2.0",
+    "puppeteer": "^5.3.1",
+    "utf-8-validate": "^5.0.2",
+    "valid-url": "^1.0.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "https://www.google.com www.google.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wdahlenburg/Hounds.git"
+  },
+  "keywords": [
+    "crawler"
+  ],
+  "author": "Wyatt Dahlenburg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wdahlenburg/Hounds/issues"
+  },
+  "homepage": "https://github.com/wdahlenburg/Hounds#readme"
+}
