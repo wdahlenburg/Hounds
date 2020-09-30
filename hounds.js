@@ -8,6 +8,7 @@ var myArgs = process.argv.slice(2);
 let scope = myArgs[1];
 let visitedUrls = [];
 let urlsToVisit = [];
+let hashCodes = [];
 let browser;
 
 async function run() {
@@ -80,65 +81,111 @@ async function run() {
       });
       visitedUrls.push(mainUrl);
       //console.log("status for main url:", mainUrlStatus);
-      const elems = await page.evaluate(
-        () =>
+      var elems = await page.evaluate(() =>
+        Array.from(document.querySelectorAll("a[href]"), (a) =>
+          a.getAttribute("href")
+        )
+      );
+
+      parseElems(elems, mainUrl);
+
+      /*
+        Try to click submit on any form. Only do this once per form to prevent getting stuck in spammy loops
+      */
+
+      var prev_hash_count = hashCodes.length;
+
+      hashCodes = await page.evaluate((hashCodes) => {
+        // console.log("Hashcodes is " + hashCodes);
+        get_string = (el) => el.outerHTML;
+        String.prototype.hashCode = function () {
+          var hash = 0;
+          if (this.length == 0) {
+            return hash;
+          }
+          for (var i = 0; i < this.length; i++) {
+            var char = this.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash = hash & hash; // Convert to 32bit integer
+          }
+          return hash;
+        };
+        var forms = document.getElementsByTagName("FORM");
+        for (var i = 0; i < forms.length; i++) {
+          var hash = get_string(forms[i]).hashCode();
+          if (!hashCodes.includes(hash)) {
+            hashCodes.push(hash);
+            forms[i].submit();
+          }
+        }
+        return hashCodes;
+      }, hashCodes);
+      // console.log("Hashcodes are now " + hashCodes);
+
+      var curr_hash_count = hashCodes.length;
+
+      /*
+        If we clicked on a new form, then we should analyze the current DOM to see if we were redirected or if new links were added.
+      */
+      if (curr_hash_count > prev_hash_count) {
+        elems = await page.evaluate(() =>
           Array.from(document.querySelectorAll("a[href]"), (a) =>
             a.getAttribute("href")
           )
-        /*for (var e in elements) {
-      await run(e.getAttribue('href'));
-    }*/
-      );
+        );
 
-      //console.log("Found elements: ", elems);
-      for (var e in elems) {
-        if (elems[e].startsWith("http")) {
-          let normal_u = normalizeUrl(elems[e]);
-          //console.log("Normal url is: " + normal_u);
-          if (validUrl.isUri(normal_u)) {
-            if (
-              url.parse(normal_u).hostname.endsWith(scope) &&
-              !visitedUrls.includes(normal_u) &&
-              !urlsToVisit.includes(normal_u)
-            ) {
-              urlsToVisit.push(normal_u);
-            }
-            // await run(normal_u);
-          } else {
-            //  console.log("BAD url: " + normal_u);
-          }
-        } else {
-          try {
-            let parsedUrl = url.parse(mainUrl);
-            let u = parsedUrl.protocol + "//" + parsedUrl.host + "/" + elems[e];
-            let normal_u = normalizeUrl(u);
-            //console.log("Parsed u: " + normal_u)
-            if (validUrl.isUri(normal_u)) {
-              if (
-                url.parse(normal_u).hostname.endsWith(scope) &&
-                !visitedUrls.includes(normal_u) &&
-                !urlsToVisit.includes(normal_u)
-              ) {
-                urlsToVisit.push(normal_u);
-              }
-              // await run(normal_u);
-            } else {
-              //console.log("BAD url: " + normal_u);
-            }
-          } catch (err) {
-            let parsedUrl = url.parse(mainUrl);
-            let u = parsedUrl.protocol + "//" + parsedUrl.host + "/" + elems[e];
-            //  console.log("Extra bad url is " + elems[e]  + " " + u);
-          }
-        }
+        parseElems(elems, mainUrl);
       }
+      //console.log("Found elements: ", elems);
     } catch (err) {
-      console.error(err.message);
+      // console.error(err.message);
     }
 
     if (urlsToVisit.length == 0) {
       await browser.close();
       return;
+    }
+  }
+}
+
+function parseElems(elems, mainUrl) {
+  for (var e in elems) {
+    if (elems[e].startsWith("http")) {
+      let normal_u = normalizeUrl(elems[e]);
+      //console.log("Normal url is: " + normal_u);
+      if (validUrl.isUri(normal_u)) {
+        if (
+          url.parse(normal_u).hostname.endsWith(scope) &&
+          !visitedUrls.includes(normal_u) &&
+          !urlsToVisit.includes(normal_u)
+        ) {
+          urlsToVisit.push(normal_u);
+        }
+        // await run(normal_u);
+      } else {
+        //  console.log("BAD url: " + normal_u);
+      }
+    } else {
+      try {
+        let parsedUrl = url.parse(mainUrl);
+        let u = parsedUrl.protocol + "//" + parsedUrl.host + "/" + elems[e];
+        let normal_u = normalizeUrl(u);
+        //console.log("Parsed u: " + normal_u)
+        if (validUrl.isUri(normal_u)) {
+          if (
+            url.parse(normal_u).hostname.endsWith(scope) &&
+            !visitedUrls.includes(normal_u) &&
+            !urlsToVisit.includes(normal_u)
+          ) {
+            urlsToVisit.push(normal_u);
+          }
+          // await run(normal_u);
+        } else {
+          //console.log("BAD url: " + normal_u);
+        }
+      } catch (err) {
+        //  console.log("Extra bad url is " + elems[e]  + " " + u);
+      }
     }
   }
 }
