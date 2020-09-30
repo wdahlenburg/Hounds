@@ -22,6 +22,7 @@ async function run() {
         page = old_pages[0];
       } else {
         page = await browser.newPage();
+        await page.setViewport({ width: 1920, height: 1040 });
       }
     } catch(err) {
       console.error(err.message);
@@ -74,7 +75,9 @@ async function run() {
   	  }
       }
     });
-    await page.goto(mainUrl);
+    await page.goto(mainUrl, {
+    waitUntil: 'networkidle2'
+});
     visitedUrls.push(mainUrl);
     //console.log("status for main url:", mainUrlStatus);
     const elems = await page.evaluate(() => 
@@ -134,7 +137,7 @@ async function run() {
 start(myArgs[0]);
 
 async function start(mainUrl) {
-    browser = await puppeteer.launch({'ignoreHTTPSErrors':true});
+    browser = await puppeteer.launch({'ignoreHTTPSErrors':true, 'args': ['--window-size=1920,1040']});
     urlsToVisit.push(mainUrl);
     run();
 };
