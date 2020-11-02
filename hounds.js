@@ -1,11 +1,18 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer-extra');
 const normalizeUrl = require("normalize-url");
 var validUrl = require("valid-url");
 var url = require("url");
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+puppeteer.use(StealthPlugin())
 
 var myArgs = process.argv.slice(2);
-
 let scope = myArgs[1];
+let proxy;
+if (myArgs.length > 2) {
+  proxy = myArgs[2];
+} else {
+  proxy = "";
+}
 let visitedUrls = [];
 let urlsToVisit = [];
 let hashCodes = [];
@@ -190,13 +197,25 @@ function parseElems(elems, mainUrl) {
   }
 }
 
-start(myArgs[0]);
+start(myArgs[0], proxy);
 
 async function start(mainUrl) {
-  browser = await puppeteer.launch({
-    ignoreHTTPSErrors: true,
-    args: ["--window-size=1920,1040"],
-  });
+  if (proxy != ''){
+    browser = await puppeteer.launch({
+      ignoreHTTPSErrors: true,
+      args: ["--window-size=1920,1040",
+      "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36",
+      "--proxy-server=http://" + proxy 
+      ],
+    });
+  } else {
+    browser = await puppeteer.launch({
+      ignoreHTTPSErrors: true,
+      args: ["--window-size=1920,1040", 
+      "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"
+      ],
+    });
+  }
   urlsToVisit.push(mainUrl);
   run();
 }
