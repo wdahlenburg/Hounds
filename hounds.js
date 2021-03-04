@@ -27,12 +27,18 @@ const argv = yargs(hideBin(process.argv))
         type: 'string',
         description: 'Proxy (Ex: proto://IP:port => http://127.0.0.1:8080)'
     })
+    .option('robots', {
+        alias: 'r',
+        type: 'boolean',
+        description: 'Flag to scan robots.txt'
+    })
     .demandOption(['url', 'scope'], 'Include both the url and scope parameters')
     .help()
     .argv
 
 let scope = argv.scope;
 let proxy = argv.proxy;
+let robots = argv.robots;
 let visitedUrls = [];
 let urlsToVisit = [];
 let hashCodes = [];
@@ -109,6 +115,12 @@ async function run() {
                     a.getAttribute("href")
                 )
             );
+
+            if (robots && elems.length == 0 && mainUrl.includes('/robots.txt')){
+                const element = await page.waitForSelector('pre');
+                const value = await element.evaluate(el => el.textContent);
+                getRobots(value, argv.url)
+            }
 
             parseElems(elems, mainUrl);
 
@@ -197,6 +209,14 @@ function parseElems(elems, mainUrl) {
     }
 }
 
+function getRobots(robotText, mainUrl) {
+    var entries = robotText.split("\n").filter((line) => line.startsWith("Disallow:") || line.startsWith("Allow:"));
+    for (i = 0; i < entries.length; i++){
+        e = entries[i].split(": ")[1];
+        urlsToVisit.push(mainUrl + e);
+    }
+}
+
 start(argv.url, proxy);
 
 async function start(mainUrl) {
@@ -212,6 +232,10 @@ async function start(mainUrl) {
         ignoreHTTPSErrors: true,
         args: args
     });
+
+    if (robots) {
+        urlsToVisit.push(mainUrl + '/robots.txt');
+    }
 
     urlsToVisit.push(mainUrl);
     run();
