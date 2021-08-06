@@ -41,7 +41,11 @@ Options:
   -u, --url      Site to crawl                               [string] [required]
   -s, --scope    Allowed scope (Ex: example.com)             [string] [required]
   -p, --proxy    Proxy (Ex: proto://IP:port => http://127.0.0.1:8080)   [string]
+  -r, --robots   Flag to scan robots.txt                               [boolean]
       --help     Show help                                             [boolean]
+
+Missing required arguments: url, scope
+Include both the url and scope parameters
 ```
 
 Example:
