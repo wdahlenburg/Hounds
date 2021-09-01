@@ -30,7 +30,7 @@ https://test.example.com/bar
 https://bar.example.com/jquery.js
 ```
 
-By default, Hounds injects javascript into every page to evalute the available forms. A hash of the DOM element is taken to determine if a particular form is different than a previously identified one. This is done to identify parameters and new paths by automatically clicking submit on new forms. The DOM element hash check prevents the crawler from repeatedly clicking on a search bar that is present across all web pages. Instead, the search bar will only be clicked on once per crawl given that it is unique and ignored on all other pages. There is room for a lot of enhancements here. This could be a good option to explictly enable. It could be nice to define a default set of content to submit for common fields like username and password so that parameters are populated. 
+By default, Hounds injects javascript into every page to evaluate the available forms. A hash of the DOM element is taken to determine if a particular form is different than a previously identified one. This is done to identify parameters and new paths by automatically clicking submit on new forms. The DOM element hash check prevents the crawler from repeatedly clicking on a search bar that is present across all web pages. Instead, the search bar will only be clicked on once per crawl given that it is unique and ignored on all other pages. There is room for a lot of enhancements here. This could be a good option to explictly enable. It could be nice to define a default set of content to submit for common fields like username and password so that parameters are populated. 
 
 ## Usage
 
