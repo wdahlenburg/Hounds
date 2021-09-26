@@ -121,9 +121,9 @@ async function run() {
                             visitedUrls.push(hash);
                         }
                     } else {
-                        if (!visitedUrls.includes(requrl)) {
-                            console.log(requrl);
-                            visitedUrls.push(requrl);
+                        if (!visitedUrls.includes(respurl)) {
+                            console.log(respurl);
+                            visitedUrls.push(respurl);
                         }
                     }
                 }
