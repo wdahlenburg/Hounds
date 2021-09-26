@@ -94,9 +94,10 @@ async function run() {
                 if (url.parse(requrl).hostname.endsWith(scope)) {
                     if (fullMode){
                         const result = formatRequest(request);
-                        if (!visitedUrls.includes(result)) {
+                        const hash = hashRequest(request);
+                        if (!visitedUrls.includes(hash)) {
                             console.log(result);
-                            visitedUrls.push(result);
+                            visitedUrls.push(hash);
                         }
                     } else {
                         if (!visitedUrls.includes(requrl)) {
@@ -114,9 +115,10 @@ async function run() {
                 if (respurl != requrl && url.parse(respurl).hostname.endsWith(scope)) {
                     if (fullMode){
                         const result = formatRequest(request);
-                        if (!visitedUrls.includes(result)) {
+                        const hash = hashRequest(request);
+                        if (!visitedUrls.includes(hash)) {
                             console.log(result);
-                            visitedUrls.push(result);
+                            visitedUrls.push(hash);
                         }
                     } else {
                         if (!visitedUrls.includes(requrl)) {
@@ -251,6 +253,23 @@ function formatRequest(request) {
             Method: request.method(),
             Url: request.url(),
             Headers: request.headers(),
+            Body: request.postData(),
+        };
+    }
+    return JSON.stringify(result)
+}
+
+function hashRequest(request) {
+    var result = {};
+    if (typeof(request.postData()) === 'undefined') {
+        result = {
+            Method: request.method(),
+            Url: request.url(),
+        };
+    } else {
+        result = {
+            Method: request.method(),
+            Url: request.url(),
             Body: request.postData(),
         };
     }
