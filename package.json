@@ -1,6 +1,6 @@
 {
   "name": "hounds",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hounds will crawl a website based on scope and print out the associated urls",
   "main": "hounds.js",
   "dependencies": {
@@ -17,7 +17,7 @@
     "eslint": "^7.21.0"
   },
   "scripts": {
-    "test": "https://www.google.com www.google.com"
+    "test": "node ./hounds.js -u https://www.google.com -s google.com"
   },
   "repository": {
     "type": "git",
