@@ -27,6 +27,11 @@ const argv = yargs(hideBin(process.argv))
         type: 'string',
         description: 'Proxy (Ex: proto://IP:port => http://127.0.0.1:8080)'
     })
+    .option('full', {
+        alias: 'f',
+        type: 'boolean',
+        description: 'Full HTTP requests in JSON format (default: false)'
+    })
     .option('robots', {
         alias: 'r',
         type: 'boolean',
@@ -38,6 +43,7 @@ const argv = yargs(hideBin(process.argv))
 
 let scope = argv.scope;
 let proxy = argv.proxy;
+let fullMode = argv.full;
 let robots = argv.robots;
 let visitedUrls = [];
 let urlsToVisit = [];
@@ -86,10 +92,17 @@ async function run() {
             page.on("request", (request) => {
                 requrl = request.url();
                 if (url.parse(requrl).hostname.endsWith(scope)) {
-                    const result = formatRequest(request);
-                    if (!visitedUrls.includes(result)) {
-                        console.log(result);
-                        visitedUrls.push(result);
+                    if (fullMode){
+                        const result = formatRequest(request);
+                        if (!visitedUrls.includes(result)) {
+                            console.log(result);
+                            visitedUrls.push(result);
+                        }
+                    } else {
+                        if (!visitedUrls.includes(requrl)) {
+                            console.log(requrl);
+                            visitedUrls.push(requrl);
+                        }
                     }
                 }
                 request.continue().catch(function() {});
@@ -99,10 +112,17 @@ async function run() {
                 const request = response.request();
                 const respurl = request.url();
                 if (respurl != requrl && url.parse(respurl).hostname.endsWith(scope)) {
-                    const result = formatRequest(request);
-                    if (!visitedUrls.includes(result)) {
-                        console.log(result);
-                        visitedUrls.push(result);
+                    if (fullMode){
+                        const result = formatRequest(request);
+                        if (!visitedUrls.includes(result)) {
+                            console.log(result);
+                            visitedUrls.push(result);
+                        }
+                    } else {
+                        if (!visitedUrls.includes(requrl)) {
+                            console.log(requrl);
+                            visitedUrls.push(requrl);
+                        }
                     }
                 }
             });

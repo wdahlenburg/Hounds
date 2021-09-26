@@ -35,12 +35,13 @@ By default, Hounds injects javascript into every page to evaluate the available 
 ## Usage
 
 ```
-$ node ./hounds.js                                                  
+$ node ./hounds.js
 Options:
       --version  Show version number                                   [boolean]
   -u, --url      Site to crawl                               [string] [required]
   -s, --scope    Allowed scope (Ex: example.com)             [string] [required]
   -p, --proxy    Proxy (Ex: proto://IP:port => http://127.0.0.1:8080)   [string]
+  -f, --full     Full HTTP requests in JSON format (default: false)    [boolean]
   -r, --robots   Flag to scan robots.txt                               [boolean]
       --help     Show help                                             [boolean]
 
@@ -70,6 +71,23 @@ https://wya.pl/wp-content/themes/lighthouse/images/headers/snow-mountains.png
 https://wya.pl/wp-content/themes/lighthouse/font-awesome/fonts/fontawesome-webfont.woff2?v=4.3.0
 https://wya.pl/?s=
 https://wya.pl/2021/01/05/year-end-review-automation-with-a-bug-bounty-pipeline
+```
+
+Using the full HTTP request mode:
+
+```
+$ node ./hounds.js -u https://wya.pl -s wya.pl -p http://127.0.0.1:8080 --full
+{"Method":"GET","Url":"https://wya.pl/","Headers":{"upgrade-insecure-requests":"1","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-includes/css/dist/block-library/style.min.css?ver=5.8.1","Headers":{"referer":"https://wya.pl/","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-content/themes/lighthouse/css/bootstrap.css?ver=5.8.1","Headers":{"referer":"https://wya.pl/","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-content/themes/lighthouse/style.css?ver=5.8.1","Headers":{"referer":"https://wya.pl/","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-content/themes/lighthouse/font-awesome/css/font-awesome.min.css?ver=5.8.1","Headers":{"referer":"https://wya.pl/","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-includes/js/wp-embed.min.js?ver=5.8.1","Headers":{"referer":"https://wya.pl/","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-includes/js/wp-emoji-release.min.js?ver=5.8.1","Headers":{"referer":"https://wya.pl/","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-content/themes/lighthouse/images/headers/snow-mountains.png","Headers":{"referer":"https://wya.pl/","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/wp-content/themes/lighthouse/font-awesome/fonts/fontawesome-webfont.woff2?v=4.3.0","Headers":{"origin":"https://wya.pl","referer":"https://wya.pl/wp-content/themes/lighthouse/font-awesome/css/font-awesome.min.css?ver=5.8.1","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36"}}
+{"Method":"GET","Url":"https://wya.pl/?s=","Headers":{"upgrade-insecure-requests":"1","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36","referer":"https://wya.pl/"}}
+{"Method":"POST","Url":"https://wya.pl/wp-login.php","Headers":{"upgrade-insecure-requests":"1","origin":"https://wya.pl","content-type":"application/x-www-form-urlencoded","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.0 Safari/537.36","referer":"https://wya.pl/wp-login.php?redirect_to=https%3A%2F%2Fwya.pl%2Fwp-admin%2F&reauth=1"},"Body":"log=&wfls-email-verification=&pwd=&redirect_to=https%3A%2F%2Fwya.pl%2Fwp-admin%2F&testcookie=1"}
 ```
 
 ## General Notes
