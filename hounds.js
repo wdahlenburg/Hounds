@@ -86,9 +86,10 @@ async function run() {
             page.on("request", (request) => {
                 requrl = request.url();
                 if (url.parse(requrl).hostname.endsWith(scope)) {
-                    if (!visitedUrls.includes(requrl)) {
-                        console.log(requrl);
-                        visitedUrls.push(requrl);
+                    const result = formatRequest(request);
+                    if (!visitedUrls.includes(result)) {
+                        console.log(result);
+                        visitedUrls.push(result);
                     }
                 }
                 request.continue().catch(function() {});
@@ -97,11 +98,11 @@ async function run() {
             page.on("response", (response) => {
                 const request = response.request();
                 const respurl = request.url();
-                const status = response.status();
                 if (respurl != requrl && url.parse(respurl).hostname.endsWith(scope)) {
-                    if (!visitedUrls.includes(respurl)) {
-                        console.log("response url:", respurl, "status:", status);
-                        visitedUrls.push(respurl);
+                    const result = formatRequest(request);
+                    if (!visitedUrls.includes(result)) {
+                        console.log(result);
+                        visitedUrls.push(result);
                     }
                 }
             });
@@ -211,10 +212,29 @@ function parseElems(elems, mainUrl) {
 
 function getRobots(robotText, mainUrl) {
     var entries = robotText.split("\n").filter((line) => line.startsWith("Disallow:") || line.startsWith("Allow:"));
-    for (i = 0; i < entries.length; i++){
-        e = entries[i].split(": ")[1];
+    for (var i = 0; i < entries.length; i++){
+        var e = entries[i].split(": ")[1];
         urlsToVisit.push(mainUrl + e);
     }
+}
+
+function formatRequest(request) {
+    var result = {};
+    if (typeof(request.postData()) === 'undefined') {
+        result = {
+            Method: request.method(),
+            Url: request.url(),
+            Headers: request.headers(),
+        };
+    } else {
+        result = {
+            Method: request.method(),
+            Url: request.url(),
+            Headers: request.headers(),
+            Body: request.postData(),
+        };
+    }
+    return JSON.stringify(result)
 }
 
 start(argv.url, proxy);
