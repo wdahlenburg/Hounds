@@ -249,10 +249,12 @@ function formatRequest(request) {
             Headers: request.headers(),
         };
     } else {
+        headers = request.headers();
+        headers['Content-Length'] = String(request.postData().length);
         result = {
             Method: request.method(),
             Url: request.url(),
-            Headers: request.headers(),
+            Headers: headers,
             Body: request.postData(),
         };
     }
