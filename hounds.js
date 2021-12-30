@@ -86,6 +86,9 @@ async function run() {
             return;
         }
 
+
+        var cookies = await page.cookies();
+
         try {
             await page.setRequestInterception(true);
             let requrl = "";
@@ -93,7 +96,7 @@ async function run() {
                 requrl = request.url();
                 if (url.parse(requrl).hostname.endsWith(scope)) {
                     if (fullMode){
-                        const result = formatRequest(request);
+                        const result = formatRequest(request, cookies);
                         const hash = hashRequest(request);
                         if (!visitedUrls.includes(hash)) {
                             console.log(result);
@@ -240,16 +243,25 @@ function getRobots(robotText, mainUrl) {
     }
 }
 
-function formatRequest(request) {
+function formatRequest(request, cookies) {
     var result = {};
+    headers = request.headers();
+    if (typeof(cookies) != 'undefined') {
+        var cookieStr = "";
+        for (var i = 0; i < cookies.length; i++){
+            key = cookies[i]["name"];
+            value = cookies[i]["value"];
+            cookieStr += key + "=" + value + ";";
+        }
+        headers['Cookie'] = cookieStr;
+    }
     if (typeof(request.postData()) === 'undefined') {
         result = {
             Method: request.method(),
             Url: request.url(),
-            Headers: request.headers(),
+            Headers: headers,
         };
     } else {
-        headers = request.headers();
         headers['Content-Length'] = String(request.postData().length);
         result = {
             Method: request.method(),
