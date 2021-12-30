@@ -245,15 +245,17 @@ function getRobots(robotText, mainUrl) {
 
 function formatRequest(request, cookies) {
     var result = {};
-    headers = request.headers();
+    var headers = request.headers();
     if (typeof(cookies) != 'undefined') {
         var cookieStr = "";
         for (var i = 0; i < cookies.length; i++){
-            key = cookies[i]["name"];
-            value = cookies[i]["value"];
+            var key = cookies[i]["name"];
+            var value = cookies[i]["value"];
             cookieStr += key + "=" + value + ";";
         }
-        headers['Cookie'] = cookieStr;
+        if (cookieStr.length != 0){
+            headers['Cookie'] = cookieStr;
+        }
     }
     if (typeof(request.postData()) === 'undefined') {
         result = {
