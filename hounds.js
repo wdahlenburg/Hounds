@@ -217,8 +217,12 @@ function parseElems(elems, mainUrl) {
         } else {
             try {
                 let parsedUrl = url.parse(mainUrl);
-                let u = parsedUrl.protocol + "//" + parsedUrl.host + "/" + elems[e];
-                let normal_u = normalizeUrl(u);
+                let path = parsedUrl.pathname
+                if (!path.endsWith("/")) {
+                    path += "/";
+                }
+                let u = parsedUrl.protocol + "//" + parsedUrl.host + path + elems[e];
+                let normal_u = normalizeUrl(u, {removeTrailingSlash: false});
                 if (validUrl.isUri(normal_u)) {
                     if (
                         url.parse(normal_u).hostname.endsWith(scope) &&
