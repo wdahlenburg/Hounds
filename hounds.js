@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs/yargs')
-const {
-    hideBin
-} = require('yargs/helpers')
+const yargs = require('yargs/yargs');
+const {hideBin} = require('yargs/helpers');
 const puppeteer = require('puppeteer-extra');
 const normalizeUrl = require("normalize-url");
 var validUrl = require("valid-url");
 var url = require("url");
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
+const badHandlers = ["javascript:", "tel:", "mailto:"];
 
 const argv = yargs(hideBin(process.argv))
     .option('url', {
@@ -86,7 +85,6 @@ async function run() {
             return;
         }
 
-
         var cookies = await page.cookies();
 
         try {
@@ -129,8 +127,16 @@ async function run() {
                             visitedUrls.push(respurl);
                         }
                     }
+
+                    if (response.status() == 301 || response.status() == 302) {
+                        if (response.headers().location) {
+                            var location = response.headers().location;
+                            parseElems([location], mainUrl);
+                        }
+                    }
                 }
             });
+
             await page.goto(mainUrl, {
                 waitUntil: "networkidle2",
             });
@@ -215,25 +221,33 @@ function parseElems(elems, mainUrl) {
                 }
             }
         } else {
-            try {
-                let parsedUrl = url.parse(mainUrl);
-                let path = parsedUrl.pathname
-                if (!path.endsWith("/")) {
-                    path += "/";
-                }
-                let u = parsedUrl.protocol + "//" + parsedUrl.host + path + elems[e];
-                let normal_u = normalizeUrl(u, {removeTrailingSlash: false});
-                if (validUrl.isUri(normal_u)) {
-                    if (
-                        url.parse(normal_u).hostname.endsWith(scope) &&
-                        !visitedUrls.includes(normal_u) &&
-                        !urlsToVisit.includes(normal_u)
-                    ) {
-                        urlsToVisit.push(normal_u);
+            if (!badHandlers.some(h => elems[e].startsWith(h))){
+                try {
+                    let parsedUrl = url.parse(mainUrl);
+                    let path = parsedUrl.pathname
+
+                    // Location: /app/foo.html
+                    if (elems[e].startsWith("/")) {
+                        path = "";
+                    } else {
+                        if (!path.endsWith("/")) {
+                            path += "/";
+                        }
                     }
+                    let u = parsedUrl.protocol + "//" + parsedUrl.host + path + elems[e];
+                    let normal_u = normalizeUrl(u, {removeTrailingSlash: false});
+                    if (validUrl.isUri(normal_u)) {
+                        if (
+                            url.parse(normal_u).hostname.endsWith(scope) &&
+                            !visitedUrls.includes(normal_u) &&
+                            !urlsToVisit.includes(normal_u)
+                        ) {
+                            urlsToVisit.push(normal_u);
+                        }
+                    }
+                } catch (err) {
+                    // console.error(err);
                 }
-            } catch (err) {
-                // console.error(err);
             }
         }
     }
