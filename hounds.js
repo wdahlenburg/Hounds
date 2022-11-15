@@ -3,7 +3,7 @@
 const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const puppeteer = require('puppeteer-extra');
-const normalizeUrl = require("normalize-url");
+const normalizeUrl = import("normalize-url");
 var validUrl = require("valid-url");
 var url = require("url");
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -322,6 +322,7 @@ async function start(mainUrl) {
     }
 
     browser = await puppeteer.launch({
+        executablePath: require('puppeteer').executablePath(),
         ignoreHTTPSErrors: true,
         args: args
     });
