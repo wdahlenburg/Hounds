@@ -26,6 +26,11 @@ const argv = yargs(hideBin(process.argv))
         type: 'string',
         description: 'Proxy (Ex: proto://IP:port => http://127.0.0.1:8080)'
     })
+    .option('vhost', {
+        alias: 'v',
+        type: 'string',
+        description: 'Vhost (Ex: example.com=127.0.0.1)'
+    })
     .option('full', {
         alias: 'f',
         type: 'boolean',
@@ -42,6 +47,8 @@ const argv = yargs(hideBin(process.argv))
 
 let scope = argv.scope;
 let proxy = argv.proxy;
+let vhost = argv.vhost;
+let opts = {proxy: proxy, vhost: vhost}
 let fullMode = argv.full;
 let robots = argv.robots;
 let visitedUrls = [];
@@ -310,15 +317,19 @@ function hashRequest(request) {
     return JSON.stringify(result)
 }
 
-start(argv.url, proxy);
+start(argv.url, opts);
 
 async function start(mainUrl) {
     let args = [
         "--window-size=1920,1040",
         "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36"
     ]
-    if (proxy) {
-        args.push("--proxy-server=" + proxy)
+    if (opts.proxy) {
+        args.push("--proxy-server=" + opts.proxy)
+    }
+    if(opts.vhost!="") {
+        vhostArgs = opts.vhost.split("=")
+        args.push("--host-resolver-rules=MAP " + vhostArgs[0] + " " + vhostArgs[1])
     }
 
     browser = await puppeteer.launch({
